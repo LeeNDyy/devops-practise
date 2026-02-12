@@ -1,0 +1,14 @@
+---
+- name: Test custom module
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: run module example
+      example-module:
+        message: "custom message"
+      register: result
+
+    - name: Show result
+      debug:
+        var: result
