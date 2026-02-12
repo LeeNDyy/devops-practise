@@ -1,6 +1,6 @@
 # Ansible. Example configs and best practises
 
-# Мини инструкция по запуску playbook со своим python module.
+## Мини инструкция по запуску playbook со своим python module.
 
 Сам модуль написан на питоне, ансибл выводит из него message и changed. Очень простой нужен для теста.
 
