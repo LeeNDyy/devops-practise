@@ -1,0 +1,8 @@
+- name:  nginx playbook
+  hosts: webservers
+  become: true
+  become_user: root
+  become_method: sudo
+  gather_facts: false
+  roles:
+    - nginx

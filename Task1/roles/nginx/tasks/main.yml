@@ -1,0 +1,31 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for nginx
+
+- name: upgrade OS
+  ansible.builtin.apt:
+    upgrade: dist
+
+- name: Update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+# - name: install nginx
+#   ansible.builtin.apt: 
+#     name: nginx
+#     state: latest
+
+- name: copypast nginx conf
+  copy:
+    src: web-nginx.conf
+    dest: /etc/nginx/nginx.conf
+  notify:
+    - restart nginx
+
+- name: start nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
