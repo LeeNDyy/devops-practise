@@ -23,17 +23,17 @@
 # #     name: nginx
 # #     state: absent
 
-# - name: Update all packages to their latest version
-#   ansible.builtin.apt:
-#     name: "*"
-#     state: latest
-#     update_cache: yes
+- name: Update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    update_cache: yes
 
-# - name: Install nginx
-#   ansible.builtin.apt:
-#     name: nginx
-#     state: latest
-#     allow_downgrade: yes
+- name: Install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: latest
+    allow_downgrade: yes
 
 # - name: copypast nginx conf
 #   copy:
@@ -59,41 +59,45 @@
 #     state: started
 #     enabled: yes
 
+#Robert configs
+# - name: install  nginx
+#   yum:
+#     name: nginx
+#     state: latest
+#   tags:
+#       nginx-package
+#       packeges
 
-
----
-- name: Install EPEL Repo package from standard repo
-  yum:
-    name: epel-release
-    state: present
-
-- name: install  nginx
-  yum:
-    name: nginx
-    state: latest
-  tags:
-      nginx-package
-      packeges
 - name: copypast nginx conf
   copy:
-    src: nginxweb1.conf
+    src: nginx-web1.conf
     dest: /etc/nginx/nginx.conf
-  notify:
-    - restart nginx
-  tags:
-    - nginx-configuration
-    
-- name: change html
-  template:
-    src: index.html.j2
-    dest: /usr/share/nginx/html/index.html
-  notify:
-    - restart nginx
+  # notify:
+  #   - restart nginx
   tags:
     - nginx-configuration
 
-- name: stop fw
-  systemd:
-    name: firewalld
-    state: stopped
-    enabled: no
+- name: Copy index.html template to Nginx
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  become: yes 
+  # notify:
+  #   - restart nginx
+  tags:
+    - nginx-configuration
+
+- name: start nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+
+# - name: stop fw
+#   systemd:
+#     name: firewalld
+#     state: stopped
+#     enabled: no

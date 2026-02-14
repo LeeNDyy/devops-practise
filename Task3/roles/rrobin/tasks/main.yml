@@ -1,8 +1,8 @@
 # tasks file for nginx
 
-- name: Upgrade the OS (apt-get dist-upgrade)
-  ansible.builtin.apt:
-    upgrade: dist
+# - name: Upgrade the OS (apt-get dist-upgrade)
+#   ansible.builtin.apt:
+#     upgrade: dist
 
 - name: Update all packages to their latest version
   ansible.builtin.apt:
@@ -10,18 +10,11 @@
     state: latest
     update_cache: yes
 
-- name: Install nginx
-  ansible.builtin.apt:
-    name: nginx
-    state: latest
-    allow_downgrade: yes
-    
-
-- name: start nginx
-  ansible.builtin.service:
-    name: nginx
-    state: started
-    enabled: yes
+# - name: Install nginx
+#   ansible.builtin.apt:
+#     name: nginx
+#     state: latest
+#     allow_downgrade: yes
 
 - name: copypast nginx conf
   copy:
@@ -36,18 +29,16 @@
     state: link
   become: yes
 
-- name: Copy new index.html to Nginx
-  copy:
-      src: index.html
-      dest: /var/www/html/index.html 
-      owner: www-data
-      group: www-data
-      mode: '0644'
 
-
-- name: restarted nginx
-  service: 
+- name: start nginx
+  ansible.builtin.service:
     name: nginx
-    state: restarted
-  become: yes
+    state: started
+    enabled: yes
+
+# - name: restarted nginx
+#   service: 
+#     name: nginx
+#     state: restarted
+#   become: yes
 
