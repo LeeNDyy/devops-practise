@@ -1,0 +1,18 @@
+- name: webservers playbook
+  hosts: webservers
+  become: yes
+  become_user: root
+  become_method: sudo
+  gather_facts: false
+  roles:
+    - webs
+
+- name: loadbalancer playbook
+  hosts: loadbalancer
+  become: yes
+  become_user: root
+  become_method: sudo
+  gather_facts: false
+  roles:
+    - rrobin
+
