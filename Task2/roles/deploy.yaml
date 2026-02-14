@@ -1,0 +1,10 @@
+---
+- name: module playbook
+  hosts: module
+  become: true
+  become_user: root
+  become_method: sudo
+  gather_facts: false
+  roles:
+    - module
+

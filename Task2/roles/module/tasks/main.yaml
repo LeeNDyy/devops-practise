@@ -1,0 +1,25 @@
+- name: Update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: latest
+
+- name: copypast nginx conf
+  copy:
+    src: nginx-web.conf
+    dest: /tmp/nginx-test/nginx-web.conf
+
+- name: start nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+
+- name: Set nginx port
+  nginx-port:
+        port: "{{ nginx_port }}"
+        config_path: "{{ nginx_config_path }}"

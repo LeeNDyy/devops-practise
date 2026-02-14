@@ -1,13 +1,14 @@
 #!/usr/bin/python
+#script for change port on nginx service
 
 import os
 import re
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import AnsibleModule # type: ignore
 
 def main():
     module_args = dict(
         port=dict(type='int', required=True),
-        config_path=dict(type='str', default='/tmp/nginx-test/nginx.conf')
+        config_path=dict(type='str', default='/tmp/nginx-test/nginx-web.conf')
     )
 
     module = AnsibleModule(
@@ -35,15 +36,12 @@ def main():
 
     pattern = re.compile(r'(listen\s+)[0-9]+;')
     
-    # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
     # Используем синтаксис \g<1> для явного указания группы
     # и raw f-string (fr'...') для корректной обработки
     new_content = pattern.sub(fr'\g<1>{port};', content, count=1)
     # --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
     if content != new_content:
-        result['changed'] = True
-        result['message'] = f'Порт в файле {config_path} изменен на {port}.'
 
         if not module.check_mode:
             try:
@@ -53,6 +51,10 @@ def main():
                 module.fail_json(msg=f'Не удалось записать в файл {config_path}: {str(e)}', **result)
     else:
         result['message'] = f'Порт в файле {config_path} уже установлен на {port}.'
+
+    if content != new_content:
+        result['changed'] = True
+        result['message'] = f'Порт в файле {config_path} изменен на {port}.'
 
     module.exit_json(**result)
 
