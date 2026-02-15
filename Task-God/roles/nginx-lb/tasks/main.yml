@@ -1,0 +1,52 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for nginx
+- name: update os
+  ansible.builtin.apt:
+    name: '*'
+    state: latest
+    update_cache: yes
+
+- name: install nginx
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - keepalived
+      - iproute2
+    state: present
+    update_cache: yes
+
+# - name: copypast nginx html
+#   ansible.builtin.template:
+#     src: index.html
+#     dest: /var/www/html/index.html
+#     owner: www-data
+#     group: www-data
+#     mode: '0644'
+#   tags:
+#     - nginx-configuration
+
+- name: copypast nginx conf
+  copy:
+    src: nginx-web.conf
+    dest: /etc/nginx/sites-available/ping-service
+  # tags:
+  #   - nginx-configuration
+
+- name: activate nginx site
+  file:
+    src: /etc/nginx/sites-available/ping-service
+    dest: /etc/nginx/sites-enabled/ping-service
+    state: link
+
+- name: Удалить default nginx site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: start nginx
+  ansible.builtin.service:
+    name: nginx
+    state: start
+    enabled: yes
+

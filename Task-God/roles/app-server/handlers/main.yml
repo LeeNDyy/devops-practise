@@ -1,0 +1,12 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for uwsgi
+---
+- name: daemon-reload
+  systemd:
+    daemon_reload: yes
+
+- name: restart ping
+  systemd:
+    name: ping.service
+    state: restarted

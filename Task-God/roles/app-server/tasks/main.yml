@@ -1,0 +1,99 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for uwsgi
+
+- name: update os
+  ansible.builtin.apt:
+    name: '*'
+    state: latest
+    update_cache: yes
+
+- name: install requirements
+  ansible.builtin.apt:
+    name:
+      # - nginx
+      - python3
+      - python3-pip
+      - python3-venv
+      - uwsgi-plugin-python3
+      - supervisor
+    state: present
+    update_cache: yes
+
+# - name: copypast nginx config
+#   copy:
+#     src: nginx-app.conf
+#     dest: /etc/nginx/nginx.conf
+
+# - name: start nginx
+#   ansible.builtin.service:  
+#     name: nginx
+#     state: start
+#     enabled: yes
+
+- name: create user
+  user:
+    name: "{{ app_user }}"
+    system: yes
+    create_home: no
+    shell: /bin/false
+
+- name: create dir
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0755'
+  loop:
+    - "{{ app_dir }}"
+    - "{{ app_dir }}/logs"
+
+
+- name: unzip dir
+  unarchive:
+    src: files/app.tar.gz
+    dest: "{{ app_dir }}"
+    remote_src: yes
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+
+
+- name: create virtualenv
+  become_user: "{{ app_user }}"
+  shell: |
+    python3 -m venv {{ virtualenv_dir }}
+    {{ virtualenv_dir }}/bin/pip install --upgrade pip
+    {{ virtualenv_dir }}/bin/pip install flask uwsgidecorators gunicorn
+  args:
+    creates: "{{ virtualenv_dir }}/bin/uwsgi"
+
+- name: configure uWSGI
+  template:
+    src: uwsgi.ini.j2
+    dest: "{{ app_dir }}/uwsgi.ini"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0644'
+  # notify: restart uwsgi
+  
+- name: systemd unit
+  ansible.builtin.template:
+    src: ping.service.j2
+    dest: /etc/systemd/system/ping.service
+  # notify:
+  #   - daemon-reload
+  #   - restart ping
+
+- name: healthcheck sript
+  template:
+    src: app.service-check.j2
+    dest: /usr/local/bin/ping-healthcheck
+    mode: '0755'
+
+- name: start service
+  systemd:
+    name: ping.service
+    enabled: yes
+    state: started
+    # daemon_reload: yes

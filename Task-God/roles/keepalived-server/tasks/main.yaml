@@ -1,0 +1,29 @@
+---
+- name: install keepalived
+  apt:
+    name: keepalived
+    state: present
+
+- name: Healthcheck script
+  copy:
+    content: |
+      #!/bin/bash
+      if curl -s --connect-timeout 5 http://localhost:8080/health | grep -q '"status":"healthy"'; then
+        exit 0
+      else
+        exit 1
+      fi
+    dest: /usr/local/bin/check-ping
+    mode: '0755'
+
+- name: Keepalived config
+  template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  notify: restart keepalived
+
+- name: start keepalived
+  systemd:
+    name: keepalived
+    enabled: yes
+    state: started

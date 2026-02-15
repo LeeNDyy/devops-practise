@@ -1,0 +1,8 @@
+---
+app_dir: /opt/ping-service
+app_user: ping
+virtualenv_dir: "{{ app_dir }}/venv"
+uwsgi_socket: /tmp/ping.sock
+app_port: 8080
+num_cpu: "{{ ansible_processor_vcpus }}"
+vip: "{{ hostvars[inventory_hostname]['vip'] | default('') }}"

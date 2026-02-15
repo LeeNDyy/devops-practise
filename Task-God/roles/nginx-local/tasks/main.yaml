@@ -1,0 +1,30 @@
+---
+- name: Установить nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Nginx config
+  template:
+    src: nginx-web.conf
+    dest: /etc/nginx/sites-available/ping-service
+  # notify: restart nginx
+
+- name: activate site
+  file:
+    src: /etc/nginx/sites-available/ping-service
+    dest: /etc/nginx/sites-enabled/ping-service
+    state: link
+  notify: restart nginx
+
+- name: deldefault
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: restart nginx
+
+- name: start nginx
+  systemd:
+    name: nginx
+    enabled: yes
+    state: started

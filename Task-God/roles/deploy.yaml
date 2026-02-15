@@ -1,0 +1,19 @@
+# - name: nginx-lb playbook
+#   hosts: nginx-lb
+#   become: true
+#   become_user: root
+#   become_method: sudo
+#   gather_facts: false
+#   roles:
+#     - nginx-lb
+
+- name: app-server playbook
+  hosts: app-server
+  become: true
+  become_user: root
+  become_method: sudo
+  gather_facts: false
+  roles:
+    - app-server
+    - nginx-local
+    - keepalived-server

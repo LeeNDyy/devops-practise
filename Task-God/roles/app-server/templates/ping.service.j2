@@ -1,0 +1,19 @@
+[Unit]
+Description=Ping Flask service via uWSGI
+After=network.target
+
+[Service]
+Type=notify
+User={{ app_user }}
+Group={{ app_user }}
+WorkingDirectory={{ app_dir }}
+Environment="PATH={{ virtualenv_dir }}/bin"
+ExecStart={{ virtualenv_dir }}/bin/uwsgi --ini {{ app_dir }}/uwsgi.ini
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=3
+NotifyAccess=all
+WatchdogSec=30
+
+[Install]
+WantedBy=multi-user.target

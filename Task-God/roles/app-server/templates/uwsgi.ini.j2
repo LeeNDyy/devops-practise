@@ -1,0 +1,15 @@
+[uwsgi]
+module = wsgi:main
+master = true
+processes = %(num_cpu)
+threads = 2
+socket = /tmp/ping.sock
+chmod-socket = 660
+vacuum = true
+die-on-term = true
+max-requests = 2000
+reload-mercy = 8
+cpu-affinity = 1
+stats = /tmp/uwsgi_stats.sock
+
+# command for create zip : tar -czf ./app.tar.gz app.py wsgi.py uwsgi.ini 
