@@ -1,0 +1,17 @@
+#Pgbench — это официальная утилита командной строки для нагрузочного тестирования СУБД PostgreSQL
+
+- name: Create pg_stat_statements extension
+  become_user: postgres
+  postgresql_query:
+    db: bench
+    query: "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
+
+- name: Initialize pgbench database
+  become_user: postgres
+  command: "pgbench -i -s 10 bench"
+
+- name: Run pgbench load test
+  become_user: postgres
+  command: "pgbench -c 10 -j 4 -T 60 -U pgbench bench"
+  environment:
+    PGPASSWORD: "pgbench_pass"

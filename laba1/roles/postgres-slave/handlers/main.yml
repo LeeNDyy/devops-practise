@@ -1,8 +1,7 @@
 #SPDX-License-Identifier: MIT-0
 ---
-# handlers file for nginx
-
-- name: restart pg
-  systemd:
+# handlers file for pg2
+- name: restart postgre
+  ansible.builtin.service:
     name: postgresql
     state: restart

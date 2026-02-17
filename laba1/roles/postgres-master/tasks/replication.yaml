@@ -1,0 +1,6 @@
+- name: Create replication user
+  become_user: postgres
+  postgresql_user:
+    name: replicator
+    password: replica_pass
+    role_attr_flags: REPLICATION,LOGIN

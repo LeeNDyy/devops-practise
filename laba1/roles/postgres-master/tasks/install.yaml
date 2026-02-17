@@ -1,0 +1,28 @@
+
+- name: Upgrade the OS (apt-get dist-upgrade)
+  ansible.builtin.apt:
+    upgrade: dist
+
+- name: Update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: Add PostgreSQL APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_lsb.codename }}-pgdg main"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Add PostgreSQL GPG key
+  ansible.builtin.apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: Install PostgreSQL and contrib
+  ansible.builtin.apt:
+    name:
+      - postgresql-16
+      - postgresql-contrib
+    state: present

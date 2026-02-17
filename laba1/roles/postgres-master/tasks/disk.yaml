@@ -1,0 +1,17 @@
+- name: create dir
+  file:
+    path: /pg_data/16
+    state: directory
+
+- name: Format and mount disk 
+  filesystem:
+    fstype: ext4
+    dev: /dev/sdb
+  when: ansible_devices['sdb'] is defined
+
+- name: Mount for PostgreSQL data
+  mount:
+    path: /pg_data/16
+    src: /dev/sdb
+    fstype: ext4
+    state: mounted

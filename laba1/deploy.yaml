@@ -1,10 +1,19 @@
-- name: postgresql playbook
-  hosts: data_base
+- name: postgres-master playbook
+  hosts: master
   become: yes
   become_user: root
   become_method: sudo
   gather_facts: false
   roles:
-    - pg
+    - postgres-master
+
+# - name: postgres-slave playbook
+#   hosts: data_base
+#   become: yes
+#   become_user: root
+#   become_method: sudo
+#   gather_facts: false
+#   roles:
+#     - postgres-slave
 
 

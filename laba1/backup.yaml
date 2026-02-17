@@ -1,8 +1,0 @@
-- name: backup playbook
-  hosts: data_base
-  become: yes
-  become_user: root
-  become_method: sudo
-  gather_facts: false
-  roles:
-    - backup
