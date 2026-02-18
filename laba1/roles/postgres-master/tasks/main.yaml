@@ -2,11 +2,11 @@
 ---
 # tasks file for postgres-master
 
-#create dir and mount disk
-- import_tasks: disk.yaml
-
 #configuration for install postgre
 - import_tasks: install.yaml
+
+#create dir and mount disk
+- import_tasks: disk.yaml
 
 # setup postgre
 - import_tasks: setup.yaml

@@ -9,20 +9,24 @@
     state: latest
     update_cache: yes
 
-- name: Add PostgreSQL APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_lsb.codename }}-pgdg main"
+- name: Install postgresql-common
+  apt:
+    name: postgresql-common
     state: present
-  when: ansible_os_family == "Debian"
 
-- name: Add PostgreSQL GPG key
-  ansible.builtin.apt_key:
-    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    state: present
+# данный таск добавляет официальный репозиторий PostgreSQL PGDG
+- name: Run PGDG setup script
+  command: /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+  args:
+    creates: /etc/apt/sources.list.d/pgdg.list
+
+- name: Update apt cache after PGDG script
+  apt:
+    update_cache: yes
 
 - name: Install PostgreSQL and contrib
-  ansible.builtin.apt:
+  apt:
     name:
-      - postgresql-16
+      - postgresql
       - postgresql-contrib
     state: present

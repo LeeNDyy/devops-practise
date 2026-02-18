@@ -1,17 +1,55 @@
-- name: create dir
+# ---
+# - name: Create mount point
+#   file:
+#     path: /pg_data/16
+#     state: directory
+#     owner: postgres
+#     group: postgres
+#     mode: '0755'
+
+# - name: Detect additional disk
+#   set_fact:
+#     pg_disk: "{{ pg_disk | default('/dev/sdb') }}"
+#   when: "'sdb' in ansible_devices"
+
+# - name: Show available disks
+#   debug:
+#     msg: "Available disks: {{ ansible_devices.keys() | list }}"
+#   when: pg_disk is not defined
+
+# - name: Format disk if it exists and not formatted
+#   filesystem:
+#     fstype: ext4
+#     dev: "{{ pg_disk }}"
+#   when: 
+#     - pg_disk is defined
+#     - pg_disk in ansible_devices
+#     - ansible_devices[pg_disk].size > 0
+
+# - name: Add to fstab and mount
+#   mount:
+#     path: /pg_data/16
+#     src: "{{ pg_disk }}"
+#     fstype: ext4
+#     state: mounted
+#   when: pg_disk is defined
+#   # ignore_errors: yes  
+
+
+---
+- name: Create PG data directory on root filesystem
   file:
     path: /pg_data/16
     state: directory
+    mode: '0700'
 
-- name: Format and mount disk 
-  filesystem:
-    fstype: ext4
-    dev: /dev/sdb
-  when: ansible_devices['sdb'] is defined
+- name: Set SELinux context (if needed)
+  sefcontext:
+    target: '/pg_data/16(/.*)?'
+    setype: postgresql_db_t
+    state: present
+  when: ansible_selinux.status == "enabled"
 
-- name: Mount for PostgreSQL data
-  mount:
-    path: /pg_data/16
-    src: /dev/sdb
-    fstype: ext4
-    state: mounted
+- name: Apply SELinux context
+  command: restorecon -R /pg_data/16
+  when: ansible_selinux.status == "enabled"
