@@ -3,7 +3,7 @@
   become: yes
   become_user: root
   become_method: sudo
-  gather_facts: false
+  gather_facts: true
   roles:
     - postgres-master
 
@@ -12,7 +12,7 @@
 #   become: yes
 #   become_user: root
 #   become_method: sudo
-#   gather_facts: false
+#   gather_facts: true
 #   roles:
 #     - postgres-slave
 
