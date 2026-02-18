@@ -1,13 +1,14 @@
-datasource:
-  Ec2:
-  strict_id: false
-ssh_pwauth: no
-serial-port-enable: true
-
 users:
+  # - name: lendy
+  #   groups: sudo
+  #   sudo: 'ALL=(ALL) NOPASSWD:ALL'
+  #   shell: /bin/bash
+  #   ssh-authorized-keys:
+  #     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGLEaYmNInYEjTvkTzqVfisvIur5FeT5zM2a2szHNPvS lendy@fedora
+
   - name: lendy
     groups: sudo
-    sudo: ALL=(ALL) NOPASSWD:ALL
+    sudo: 'ALL=(ALL) NOPASSWD:ALL'
     shell: /bin/bash
     ssh-authorized-keys:
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOSXMTBS9BTLLyqbP9kG7G7a+whg3GE1H4lkKLI1ccJq lendy@fedora
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGLEaYmNInYEjTvkTzqVfisvIur5FeT5zM2a2szHNPvS lendy@fedora

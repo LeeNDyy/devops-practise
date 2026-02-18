@@ -4,7 +4,7 @@ data "yandex_compute_image" "ubuntu" {
 
 
 resource "yandex_compute_instance" "lendy" {
-  count = 1
+  count = 2
 
   name = "lendy-${count.index + 1}"
   hostname = "lendy-${count.index + 1}"
@@ -36,12 +36,9 @@ resource "yandex_compute_instance" "lendy" {
 
   metadata = {
     user-data = file("${path.module}/users.yaml")
-    # user-data = file("users.yaml")
-    # ssh-keys  = <<-EOT
-    # root:ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOSXMTBS9BTLLyqbP9kG7G7a+whg3GE1H4lkKLI1ccJq # lendy@fedora 
+    # ssh-keys = <<-EOT
+    # qwerty:ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGLEaYmNInYEjTvkTzqVfisvIur5FeT5zM2a2szHNPvS lendy@fedora
     # EOT
-    ssh-keys = file("/home/lendy/.ssh/id_ed1.pub")
-    # user-data = file("users.yaml")
   }
 
   scheduling_policy {
