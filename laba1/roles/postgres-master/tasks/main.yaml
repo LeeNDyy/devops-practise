@@ -2,11 +2,12 @@
 ---
 # tasks file for postgres-master
 
-#configuration for install postgre
-- import_tasks: install.yaml
+# Installs PostgreSQL 16 + dependencies, prepares /pg_data directory with proper permissions,
+# stops default service and cleans existing clusters for manual initialization
 
-#create dir and mount disk
-- import_tasks: disk.yaml
+# - import_tasks: install.yaml
+
+# - import_tasks: prepare-disk.yaml
 
 # setup postgre
 - import_tasks: setup.yaml

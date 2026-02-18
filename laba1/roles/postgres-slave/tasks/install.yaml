@@ -13,7 +13,7 @@
 
 - name: install basic utils
   ansible.builtin.apt:
-    name:
+    names:
       - gnupg2 
       - curl 
       - ca-certificates 
@@ -21,7 +21,6 @@
       - sudo 
       - vim
     state: latest
-    update_cache: yes
 
 - name: Install postgresql-common
   ansible.builtin.apt:

@@ -1,0 +1,44 @@
+# this module needed for prepared disk
+
+- name: create pg_data dir
+  ansible.builtin.file:
+    path: /pg_data
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
+    become: yes
+
+- name: Verify initdb version
+  command: /usr/lib/postgresql/16/bin/initdb --version
+  register: initdb_version
+  changed_when: false
+
+- name: Stop default PostgreSQL cluster
+  systemd:
+    name: postgresql
+    state: stopped
+
+- name: Drop default cluster 13 main (ignore if not exists)
+  command: pg_dropcluster --stop 13 main
+  changed_when: false
+
+- name: Verify clusters removed
+  command: pg_lsclusters
+  register: pg_clusters
+  changed_when: false
+
+# test vm
+- name: Check pg_data mount point or directory
+  shell: mount | grep pg_data || ls -ld /pg_data
+  register: pg_data_check
+  changed_when: false
+
+- name: Display pg_data check result
+  debug:
+    msg: "{{ pg_data_check.stdout_lines }}"
+
+- name: Check PostgreSQL client version
+  command: psql --version
+  register: psql_version
+  changed_when: false
