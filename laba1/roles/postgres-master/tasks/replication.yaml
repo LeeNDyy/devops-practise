@@ -1,6 +1,36 @@
-- name: Create replication user
-  become_user: postgres
-  postgresql_user:
-    name: replicator
-    password: replica_pass
-    role_attr_flags: REPLICATION,LOGIN
+- name: Создать пользователя replicator (через shell)
+  shell: |
+    sudo -u postgres psql -c "
+    CREATE USER replicator WITH REPLICATION LOGIN PASSWORD 'repl1234';
+    GRANT CONNECT ON DATABASE bench TO replicator;
+    GRANT CONNECT ON DATABASE postgres TO replicator;"
+  ignore_errors: yes #because user was created
+  changed_when: false
+
+- name: Добавить в pg_hba.conf (репликация)
+  lineinfile:
+    path: "{{ pg_hba_conf }}"
+    line: "host replication replicator 89.169.166.234/32 scram-sha-256"
+    insertafter: EOF
+
+- name: reload postgres
+  shell: pg_ctl -D {{ pg_data_dir }} reload
+  changed_when: false
+
+- name: Разрешить репликацию в postgresql.conf
+  lineinfile:
+    path: "{{ postgres_conf }}"
+    regexp: '^wal_level'
+    line: "wal_level = replica"
+
+- name: Увеличить слоты репликации
+  lineinfile:
+    path: "{{ postgres_conf }}"
+    regexp: '^max_replication_slots'
+    line: "max_replication_slots = 10"
+
+- name: Включить WAL отправку
+  lineinfile:
+    path: "{{ postgres_conf }}"
+    regexp: '^max_wal_senders'
+    line: "max_wal_senders = 10"

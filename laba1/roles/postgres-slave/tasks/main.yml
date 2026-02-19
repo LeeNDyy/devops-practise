@@ -2,9 +2,12 @@
 ---
 # tasks file for postgres-slave
 
-# Installs PostgreSQL 16 + dependencies, prepares /pg_data directory with proper permissions,
-# stops default service and cleans existing clusters for manual initialization
+# Installs PostgreSQL 16 + dependencies, prepares /pg_data directory with proper permissions
 
-- import_tasks: install.yaml
+# - import_tasks: install.yaml
 
-- import_tasks: prepare-disk.yaml
+# - import_tasks: prepare-disk.yaml
+
+- import_tasks: setup.yaml
+
+- import_tasks: physical-rep.yaml

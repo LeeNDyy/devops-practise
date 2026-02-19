@@ -1,0 +1,25 @@
+    #- name: Остановить PostgreSQL
+    #  shell: pg_ctl -D {{ pg_data_dir }} stop -w || true
+
+    - name: Удалить data dir
+      file:
+        path: "{{ logical_data_dir}}"
+        state: absent
+
+    - name: Создать data dir
+      file:
+        path: "{{ logical_data_dir }}"
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: '0700'
+
+    - name: pg_basebackup с мастера
+      shell: |
+        pg_basebackup -h 89.169.174.104 -p 5432 -U replicator \
+        -D {{ logical_data_dir }} --wal-method=stream -Fp -Xs -R -P --verbose
+      environment:
+        PGPASSWORD: "repl1234"
+
+    #- name: Запустить реплику
+    #  shell: pg_ctl -D {{ logical_data_dir }} start -w

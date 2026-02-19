@@ -9,11 +9,13 @@
 
 # - import_tasks: prepare-disk.yaml
 
-# setup postgre
-- import_tasks: setup.yaml
+# setup postgres, up initdb
+# - import_tasks: setup.yaml
+
+#- import_tasks: configure-logging.yaml
 
 # pgbench configuration
-- import_tasks: pgbench.yaml
+#- import_tasks: pgbench.yaml
 
-# replicas
-- import_tasks: replication.yaml
+#  create replicas user and some params
+ - import_tasks: replication.yaml

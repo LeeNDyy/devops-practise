@@ -13,20 +13,20 @@
   register: initdb_version
   changed_when: false
 
-- name: Stop default PostgreSQL cluster
-  systemd:
-    name: postgresql
-    state: stopped
+#- name: Stop default PostgreSQL cluster
+#  systemd:
+#    name: postgresql
+#    state: stopped
 
-- name: Drop default cluster 13 main (ignore if not exists)
-  command: pg_dropcluster --stop 13 main
-  failed_when: false
-  changed_when: false
+#- name: Drop default cluster 13 main (ignore if not exists)
+#  command: pg_dropcluster --stop 13 main
+#  failed_when: false
+#  changed_when: false
 
-- name: Verify clusters removed
-  command: pg_lsclusters
-  register: pg_clusters
-  changed_when: false
+#- name: Verify clusters removed
+#  command: pg_lsclusters
+#  register: pg_clusters
+#  changed_when: false
 
 # test vm
 - name: Check pg_data mount point or directory
@@ -38,7 +38,7 @@
   debug:
     msg: "{{ pg_data_check.stdout_lines }}"
 
-- name: Check PostgreSQL client version
-  command: psql --version
-  register: psql_version
-  changed_when: false
+#- name: Check PostgreSQL client version
+#  command: psql --version
+#  register: psql_version
+#  changed_when: false

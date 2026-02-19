@@ -11,6 +11,12 @@
     state: latest
     update_cache: yes
 
+- name: Install python3-psycopg2 (required for Ansible PostgreSQL modules)
+  apt:
+    name: python3-psycopg2
+    state: present
+    update_cache: yes
+
 - name: install basic utils
   ansible.builtin.apt:
     name:

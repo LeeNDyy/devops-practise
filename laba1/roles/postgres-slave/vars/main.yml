@@ -1,3 +1,9 @@
 #SPDX-License-Identifier: MIT-0
 ---
-# vars file for pg2
+# vars file for postgres-slave
+
+#dir for db
+logical_data_dir: /pg_data/16
+postgres_conf: "{{ logical_data_dir }}/conf.d/01-custom.conf"
+pg_hba_conf: "{{ logical_data_dir }}/pg_hba.conf"
+

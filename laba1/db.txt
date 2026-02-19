@@ -1,0 +1,32 @@
+-- создаём БД под тест
+CREATE DATABASE bench;
+
+-- создаём пользователя
+CREATE USER pgbench WITH PASSWORD 'strong_password';
+
+-- даём права на БД bench
+GRANT CONNECT ON DATABASE bench TO pgbench;
+\c bench
+
+GRANT USAGE ON SCHEMA public TO pgbench;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO pgbench;
+GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO pgbench;
+
+-- чтобы новые таблицы/секвенсы тоже были доступны
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO pgbench;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO pgbench;
+
+
+\c bench
+
+-- расширение статистики запросов
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+
+-- при необходимости другие модули, которые нужны по заданию:
+-- пример: contrib/citext
+CREATE EXTENSION IF NOT EXISTS citext;
+-- пример: cube
+CREATE EXTENSION IF NOT EXISTS cube;

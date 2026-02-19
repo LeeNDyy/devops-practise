@@ -1,17 +1,81 @@
-#Pgbench — это официальная утилита командной строки для нагрузочного тестирования СУБД PostgreSQL
+# перед запуском тестирования нужно дать права нашему пользователю к базе bench, чтобы не ебать себе мозги я сделал это вручную, не так много ввел))
+#sudo -u postgres psql -d bench
 
-- name: Create pg_stat_statements extension
-  become_user: postgres
-  postgresql_query:
-    db: bench
-    query: "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
+# Выполни эти команды:
+#GRANT ALL ON SCHEMA public TO pgbench;
+#ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO pgbench;
+#ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO pgbench;
+#\q
 
-- name: Initialize pgbench database
-  become_user: postgres
-  command: "pgbench -i -s 10 bench"
 
-- name: Run pgbench load test
-  become_user: postgres
-  command: "pgbench -c 10 -j 4 -T 60 -U pgbench bench"
-  environment:
-    PGPASSWORD: "pgbench_pass"
+#sudo -u postgres psql -d bench подключение к базе
+
+#проверка прав bench=# \dn+ public
+
+
+    - name: pgbench инициализация (-i -s 10)
+      shell: |
+        pgbench -h localhost -p 5432 -U pgbench \
+                -i -s 10 bench
+      environment:
+        PGPASSWORD: "1234"
+      register: pgbench_init
+      changed_when: true
+
+    # в иделае все куда то складвать, поэтому
+    #- name: Сохранить вывод инициализации
+    #copy:
+    #  content: "{{ pgbench_init.stdout }}\n{{ pgbench_init.stderr }}"
+    #   dest: "{{ results_dir }}/02-pgbench-init.log"
+
+    - name: Проверить созданные таблицы
+      shell: |
+        PGPASSWORD='1234' psql -h localhost -p 5432 \
+        -U pgbench -d bench -c "\dt"
+      register: tables_check
+      changed_when: false
+
+    #- name: Сохранить вывод инициализации
+    #  copy:
+    #    content: "{{ pgbench_init.stdout }}\n{{ pgbench_init.stderr }}"
+    #    dest: "/tmp/pgbench-results/02-pgbench-init.log"
+
+    #- name: Ротация логов перед нагрузкой
+    #  shell: pg_rotate_logfile()
+
+    - name: pgbench нагрузочный тест (10 клиентов, 4 потока, 5 мин)
+      shell: |
+        pgbench -h localhost -p 5432 -U pgbench \
+                -c 10 -j 4 -T 300 -P 10 bench
+      environment:
+        PGPASSWORD: "1234"
+      register: pgbench_test
+      changed_when: true
+
+
+# после того как в терминале высветился ок, вам нужно перейти в машинку и глянуть файл логов, который мы создавали
+# он находится по пути: /pg_data/16/log/postgresql-Thu.log 
+
+#также если не хотите замарачиваться можно также провести нагрузочное тестирование командой:
+#PGPASSWORD=1234 pgbench -h localhost -p 5432 -U pgbench -c 10 -j 4 -T 60 bench
+
+
+# опять же в иделае все это дело сохраняь, потом архивировать и бла бла бла
+
+    #- name: Сохранить результаты нагрузочного теста
+    #  copy:
+    #    content: "{{ pgbench_test.stdout }}\n{{ pgbench_test.stderr }}"
+    #    dest: "{{ results_dir }}/04-pgbench-test.log"
+
+    #- name: Найти логи теста (последние 7 минут)
+    #  find:
+    #    paths: "{{ logical_data_dir }}/log"
+    #    age: "7m"
+    #  register: pg_logs
+
+    #- name: Архивировать логи pgbench
+    #  archive:
+    #    path: "{{ item.path }}"
+    #    dest: "{{ results_dir }}/05-pg-logs.tar.gz"
+    #  loop: "{{ pg_logs.files }}"
+

@@ -1,0 +1,92 @@
+# база и пользователь для нее созданы ручками, так как были траблы при создании в ansible
+
+# тут опишу таски связанные с логированием.
+    - name: logging_collector = on
+      lineinfile:
+        path: "{{ postgres_conf }}"
+        regexp: '^(#?\s*)?logging_collector'
+        line: "logging_collector = on"
+        backup: yes
+      notify: reload postgres
+
+    - name: log_directory = 'log'
+      lineinfile:
+        path: "{{ postgres_conf }}"
+        regexp: '^(#?\s*)?log_directory'
+        line: "log_directory = 'log'"
+        backup: yes
+      notify: reload postgres
+
+    - name: log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'
+      lineinfile:
+        path: "{{ postgres_conf }}"
+        regexp: '^(#?\s*)?log_filename'
+        line: "log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'"
+        backup: yes
+      notify: reload postgres
+
+    - name: log_statement = 'all'
+      lineinfile:
+        path: "{{ postgres_conf }}"
+        regexp: '^(#?\s*)?log_statement'
+        line: "log_statement = 'all'"
+        backup: yes
+      notify: reload postgres
+
+    - name: log_duration = on
+      lineinfile:
+        path: "{{ postgres_conf }}"
+        regexp: '^(#?\s*)?log_duration'
+        line: "log_duration = on"
+        backup: yes
+      notify: reload postgres
+
+    - name: log_line_prefix 
+      lineinfile:
+        path: "{{ postgres_conf }}"
+        regexp: '^(#?\s*)?log_line_prefix'
+        line: "log_line_prefix = '%m [%p] %u@%d %r %c '"
+        backup: yes
+      notify: reload postgres
+
+    - name: log_checkpoints = on
+      lineinfile:
+        path: "{{ postgres_conf }}"
+        regexp: '^(#?\s*)?log_checkpoints'
+        line: "log_checkpoints = on"
+        backup: yes
+      notify: reload postgres
+
+    - name: log_connections = on
+      lineinfile:
+        path: "{{ postgres_conf }}"
+        regexp: '^(#?\s*)?log_connections'
+        line: "log_connections = on"
+        backup: yes
+      notify: reload postgres
+
+    - name: log_disconnections = on
+      lineinfile:
+        path: "{{ postgres_conf }}"
+        regexp: '^(#?\s*)?log_disconnections'
+        line: "log_disconnections = on"
+        backup: yes
+      notify: reload postgres
+
+    - name: Создать директорию логов
+      file:
+        path: "{{ logical_data_dir }}/log"
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: '0750'
+        recurse: yes
+
+    - name: Применить настройки логирования
+      meta: flush_handlers
+
+    - name: Создать директорию и сохранить конфиг
+      shell: mkdir -p "{{ results_dir }}" && cp "{{ postgres_conf }}" "{{ results_dir }}/01-custom.conf.after-logging"
+      args:
+        creates: "{{ results_dir }}/01-custom.conf.after-logging"
+

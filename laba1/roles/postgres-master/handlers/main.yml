@@ -1,7 +1,9 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # handlers file for pg1
-- name: restart postgre
-  ansible.builtin.service:
-    name: postgresql
-    state: restart
+    - name: reload postgres
+      shell: sudo -u postgres "/usr/lib/postgresql/16/bin/pg_ctl -D /pg_data/16 reload"
+      changed_when: false
+
+    - name: restart postgres
+      shell: pg_ctl -D {{ pg_data_dir }} restart -w

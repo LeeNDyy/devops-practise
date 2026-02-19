@@ -7,13 +7,13 @@
   roles:
     - postgres-master
 
-# - name: postgres-slave playbook
-#   hosts: data_base
-#   become: yes
-#   become_user: root
-#   become_method: sudo
-#   gather_facts: true
-#   roles:
-#     - postgres-slave
+- name: postgres-slave playbook
+  hosts: replica
+  become: yes
+  become_user: root
+  become_method: sudo
+  gather_facts: true
+  roles:
+    - postgres-slave
 
 
