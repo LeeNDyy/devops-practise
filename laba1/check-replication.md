@@ -5,7 +5,7 @@
 sudo -u postgres /usr/lib/postgresql/16/bin/pg_ctl -D /pg_data/16 start -w
 ```
 
-После того как реплика запустилась на mastere данной командой, можно будет посмотреть хост второй машины и параметры, которые мы указывали при нагрузочном тестировании.
+После того как реплика запустилась на mastere можно посмотреть на хосту второй машины параметры, которые мы указывали при нагрузочном тестировании.
 
 ```bash
 sudo -u postgres psql -c 'SELECT client_addr, state, sent_lsn, write_lsn, flush_lsn, replay_lsn FROM pg_stat_replication;'
