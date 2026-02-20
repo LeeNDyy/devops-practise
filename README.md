@@ -1,2 +1,2 @@
-# Data-bases
+# labs
 
