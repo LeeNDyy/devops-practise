@@ -1,4 +1,4 @@
-# app.py (ПОЛНАЯ замена)
+# еле написал, брал конфиги у чувака с гитхаба # немножнко пидор
 import os
 from flask import Flask, request, jsonify, abort
 import psycopg2
