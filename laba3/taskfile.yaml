@@ -10,5 +10,9 @@ tasks:
   
   down:
     cmds:
-      - docker compose down -v
+      - docker compose down
 
+  # restart:
+  #   cmds:
+  #     - task: down
+  #     - task: up
