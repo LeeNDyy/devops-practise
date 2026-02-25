@@ -28,6 +28,7 @@ services:
     volumes:
       - ./log-conf/prometheus.yaml:/etc/prometheus/prometheus.yml
       - prometheusdata:/prometheus
+    restart: unless-stopped 
 
   grafana:
     image: grafana/grafana:latest
@@ -44,6 +45,7 @@ services:
     volumes:
       - ./grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
       - grafanadata:/var/lib/grafana
+    restart: unless-stopped 
 
   postgres:
     image: postgres:15-alpine
@@ -56,11 +58,24 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5433:5432"
+    restart: unless-stopped 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  postgres-exporter:
+    image: wrouesnel/postgres_exporter:latest
+    container_name: postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${PG_USER}:${PG_PASSWORD}@postgres:5432/${PG_NAME}?sslmode=disable"
+    ports:
+    - "9187:9187"
+    restart: unless-stopped
+    depends_on:
+    - postgres
+
 
   flask:
     build: .
@@ -85,13 +100,14 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./data/nginx:/var/log/nginx/
+    restart: unless-stopped 
     depends_on:
       - flask
   
   nginx-exporter:
     image: nginx/nginx-prometheus-exporter:latest
     command:
-      - "-nginx.scrape-uri=http://nginx/nginx_status"
+      - -nginx.scrape-uri=http://laba3-nginx-1/nginx_status
     ports:
       - "9113:9113"
     depends_on:
