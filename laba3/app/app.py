@@ -1,11 +1,15 @@
 import os
 import time
+import traceback
 from flask import Flask, request, jsonify, abort
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
 app = Flask(__name__)
+
+# Глобальная переменная для времени начала запроса
+start_time = None
 
 # Метрики Prometheus
 REQUEST_COUNT = Counter(
@@ -22,47 +26,87 @@ DB_ERRORS = Counter(
     'db_errors_total', 'Total DB errors'
 )
 
-# ДЕКОРАТОР ДЛЯ ОТСЛЕЖИВАНИЯ МЕТРИК
-def track_request(func):
-    def wrapper(*args, **kwargs):
+@app.before_request
+def before_request():
+    global start_time
+    start_time = time.time()
+
+@app.after_request
+def track_after_request(response):
+    global start_time
+    if start_time:
         endpoint = request.path
-        start = time.time()
-        try:
-            resp = func(*args, **kwargs)
-            # Flask возвращает Response объект или tuple (data, status)
-            status = 200
-            if isinstance(resp, tuple) and len(resp) > 1:
-                status = resp[1]
-        except Exception:
-            status = 500
-            REQUEST_COUNT.labels(request.method, endpoint, str(status)).inc()
-            REQUEST_LATENCY.labels(endpoint).observe(time.time() - start)
-            raise
-        
-        REQUEST_COUNT.labels(request.method, endpoint, str(status)).inc()
-        REQUEST_LATENCY.labels(endpoint).observe(time.time() - start)
-        return resp
-    wrapper.__name__ = func.__name__
-    return wrapper
+        duration = time.time() - start_time
+        REQUEST_COUNT.labels(
+            request.method, 
+            endpoint, 
+            str(response.status_code)
+        ).inc()
+        REQUEST_LATENCY.labels(endpoint).observe(duration)
+    return response
+
+@app.errorhandler(Exception)
+def handle_error(error):
+    global start_time
+    if start_time:
+        endpoint = request.path
+        duration = time.time() - start_time
+        status = "500"
+        if hasattr(error, 'code'):
+            status = str(error.code)
+        REQUEST_COUNT.labels(request.method, endpoint, status).inc()
+        REQUEST_LATENCY.labels(endpoint).observe(duration)
+    if hasattr(error, 'code'):
+        return jsonify({"error": str(error)}), error.code
+    return jsonify({"error": "Internal Server Error"}), 500
 
 def get_db():
-    return psycopg2.connect(
-        host=os.getenv('PG_HOST'),
-        port=int(os.getenv('PG_PORT')),
-        database=os.getenv('PG_NAME'),
-        user=os.getenv('PG_USER'),
-        password=os.getenv('PG_PASSWORD'),
-        cursor_factory=RealDictCursor
-    )
+    try:
+        return psycopg2.connect(
+            host=os.getenv('PG_HOST'),
+            port=int(os.getenv('PG_PORT')),
+            database=os.getenv('PG_NAME'),
+            user=os.getenv('PG_USER'),
+            password=os.getenv('PG_PASSWORD'),
+            cursor_factory=RealDictCursor
+        )
+    except Exception as e:
+        DB_ERRORS.inc()
+        raise
 
 # Metrics endpoint для Prometheus
 @app.route("/metrics")
 def metrics():
     return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
 
-# USERS API с метриками
+# тестовые роуты
+@app.route('/test/200')
+def test_200():
+    return jsonify({"status": "OK"}), 200
+
+@app.route('/test/400')
+def test_400():
+    abort(400)
+
+@app.route('/test/404')
+def test_404():
+    abort(404)
+
+@app.route('/test/409')
+def test_409():
+    return jsonify({"error": "Conflict"}), 409
+
+@app.route('/test/500')
+def test_500():
+    1 / 0  
+    return "OK"
+
+@app.route('/test/slow')
+def test_slow():
+    time.sleep(2)
+    return jsonify({"status": "slow OK"}), 200
+
 @app.route("/users", methods=["GET"])
-@track_request
 def list_users():
     limit = request.args.get('limit', 10, type=int)
     conn = get_db()
@@ -74,7 +118,6 @@ def list_users():
     return jsonify([dict(row) for row in rows])
 
 @app.route("/users/<int:user_id>", methods=["GET"])
-@track_request
 def get_user(user_id):
     conn = get_db()
     cur = conn.cursor()
@@ -87,9 +130,10 @@ def get_user(user_id):
     return jsonify(dict(row))
 
 @app.route("/users", methods=["POST"])
-@track_request
 def create_user():
     data = request.get_json()
+    if not data or 'name' not in data:
+        abort(400)
     conn = get_db()
     cur = conn.cursor()
     cur.execute(
@@ -103,9 +147,10 @@ def create_user():
     return jsonify({"id": new_id, **data}), 201
 
 @app.route("/users/<int:user_id>", methods=["PUT"])
-@track_request
 def update_user(user_id):
     data = request.get_json()
+    if not data or 'name' not in data:
+        abort(400)
     conn = get_db()
     cur = conn.cursor()
     cur.execute(
@@ -121,7 +166,6 @@ def update_user(user_id):
     return jsonify({"id": user_id, **data})
 
 @app.route("/users/<int:user_id>", methods=["DELETE"])
-@track_request
 def delete_user(user_id):
     conn = get_db()
     cur = conn.cursor()
