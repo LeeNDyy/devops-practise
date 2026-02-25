@@ -30,6 +30,7 @@
           "color": {
             "mode": "thresholds"
           },
+          "decimals": 0,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -40,21 +41,21 @@
               },
               {
                 "color": "yellow",
-                "value": 1000
+                "value": 100000000
               },
               {
                 "color": "red",
-                "value": 5000
+                "value": 500000000
               }
             ]
           },
-          "unit": "short"
+          "unit": "bytes"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
+        "h": 6,
+        "w": 4,
         "x": 0,
         "y": 0
       },
@@ -83,12 +84,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "sum(http_requests_total{job=\"flask\"})",
-          "legendFormat": "Total",
+          "expr": "process_resident_memory_bytes",
+          "legendFormat": "RSS",
           "refId": "A"
         }
       ],
-      "title": "Total Requests",
+      "title": "RSS Memory",
       "type": "stat"
     },
     {
@@ -98,7 +99,10 @@
       },
       "fieldConfig": {
         "defaults": {
-          "decimals": 3,
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -109,22 +113,22 @@
               },
               {
                 "color": "yellow",
-                "value": 0.1
+                "value": 0.5
               },
               {
                 "color": "red",
-                "value": 0.5
+                "value": 1
               }
             ]
           },
-          "unit": "s"
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 6,
+        "h": 6,
+        "w": 4,
+        "x": 4,
         "y": 0
       },
       "id": 2,
@@ -152,11 +156,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"flask\"}[2m])) by (le))",
+          "expr": "rate(process_cpu_seconds_total[5m])",
+          "legendFormat": "CPU sec/s",
           "refId": "A"
         }
       ],
-      "title": "P95 Latency",
+      "title": "CPU Usage",
       "type": "stat"
     },
     {
@@ -166,6 +171,9 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -184,14 +192,14 @@
               }
             ]
           },
-          "unit": "megabytes"
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 12,
+        "h": 6,
+        "w": 4,
+        "x": 8,
         "y": 0
       },
       "id": 3,
@@ -219,11 +227,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "process_resident_memory_bytes{job=\"flask\"} / 1024 / 1024",
+          "expr": "process_open_fds",
+          "legendFormat": "File Descriptors",
           "refId": "A"
         }
       ],
-      "title": "Memory (MB)",
+      "title": "Open FDs",
       "type": "stat"
     },
     {
@@ -233,9 +242,11 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
           "mappings": [],
-          "max": 100,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -245,22 +256,22 @@
               },
               {
                 "color": "yellow",
-                "value": 50
+                "value": 100
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 500
               }
             ]
           },
-          "unit": "percent"
+          "unit": "rps"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
+        "h": 6,
+        "w": 4,
+        "x": 12,
         "y": 0
       },
       "id": 4,
@@ -288,11 +299,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "rate(process_cpu_seconds_total{job=\"flask\"}[2m]) * 100",
+          "expr": "increase(http_requests_total[5m])",
+          "legendFormat": "req/s",
           "refId": "A"
         }
       ],
-      "title": "CPU Usage",
+      "title": "Requests Total",
       "type": "stat"
     },
     {
@@ -303,21 +315,10 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "red",
-            "mode": "value"
+            "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "OK"
-                }
-              },
-              "type": "value"
-            }
-          ],
+          "decimals": 2,
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -326,20 +327,24 @@
                 "value": 0
               },
               {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
                 "color": "red",
-                "value": 80
+                "value": 1
               }
             ]
           },
-          "unit": "short"
+          "unit": "rps"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 0,
-        "y": 8
+        "h": 6,
+        "w": 4,
+        "x": 16,
+        "y": 0
       },
       "id": 5,
       "options": {
@@ -366,7 +371,8 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "db_errors_total{job=\"flask\"}",
+          "expr": "increase(db_errors_total[5m])",
+          "legendFormat": "Errors",
           "refId": "A"
         }
       ],
@@ -378,8 +384,10 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": "Он выполняет блокирующую сборку мусора всех поколений.\n",
       "fieldConfig": {
         "defaults": {
+          "decimals": 1,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -393,15 +401,16 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "rps"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 6,
-        "y": 8
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 0
       },
       "id": 6,
       "options": {
@@ -428,11 +437,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "sum(rate(python_gc_collections_total{job=\"flask\"}[2m])) by (generation)",
+          "expr": "increase(python_gc_collections_total{generation=\"0\"}[5m])",
+          "legendFormat": "Gen0",
           "refId": "A"
         }
       ],
-      "title": "GC Collections/sec",
+      "title": "Python GC Gen0",
       "type": "stat"
     },
     {
@@ -442,6 +452,10 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -451,19 +465,24 @@
                 "value": 0
               },
               {
+                "color": "yellow",
+                "value": 50
+              },
+              {
                 "color": "red",
-                "value": 80
+                "value": 200
               }
             ]
-          }
+          },
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 12,
-        "y": 8
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 6
       },
       "id": 7,
       "options": {
@@ -490,11 +509,169 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "sum(rate(python_gc_objects_collected_total{job=\"flask\"}[2m])) by (generation)",
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) * 1000",
+          "legendFormat": "P95",
           "refId": "A"
         }
       ],
-      "title": "Objects Collected/sec",
+      "title": "Request Duration P95",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 4,
+        "y": 6
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "histogram_quantile(0.5, rate(http_request_duration_seconds_bucket[5m])) * 1000",
+          "legendFormat": "P50",
+          "refId": "A"
+        }
+      ],
+      "title": "Request Duration P50",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 8,
+        "y": 6
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "sum(increase(http_requests_total{http_status=~\"2..\"}[5m]))",
+          "legendFormat": "2xx",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "sum(increase(http_requests_total{http_status=~\"4..\"}[5m]))",
+          "legendFormat": "4xx",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "sum(increase(http_requests_total{http_status=~\"5..\"}[5m]))",
+          "legendFormat": "5xx",
+          "refId": "C"
+        }
+      ],
+      "title": "Requests by Status",
       "type": "stat"
     },
     {
@@ -554,7 +731,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "rps"
         },
         "overrides": []
       },
@@ -562,9 +740,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 12
       },
-      "id": 8,
+      "id": 10,
       "options": {
         "legend": {
           "calcs": [],
@@ -585,90 +763,13 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "sum(rate(http_requests_total{job=\"flask\"}[5m])) by (endpoint, method)",
+          "expr": "rate(http_requests_total[5m])",
+          "legendFormat": "{{method}} {{endpoint}} {{http_status}}",
           "refId": "A"
         }
       ],
-      "title": "Requests by Endpoint",
+      "title": "All HTTP Requests",
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "scaleDistribution": {
-              "type": "linear"
-            }
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
-      },
-      "id": 9,
-      "options": {
-        "calculate": true,
-        "calculation": {},
-        "cellGap": 2,
-        "cellValues": {},
-        "color": {
-          "exponent": 0.5,
-          "fill": "dark-orange",
-          "mode": "scheme",
-          "reverse": false,
-          "scale": "exponential",
-          "scheme": "Oranges",
-          "steps": 128
-        },
-        "exemplars": {
-          "color": "rgba(255,0,255,0.7)"
-        },
-        "filterValues": {
-          "le": 1e-9
-        },
-        "legend": {
-          "show": false
-        },
-        "rowsFrame": {
-          "layout": "auto"
-        },
-        "showValue": "never",
-        "tooltip": {
-          "mode": "none",
-          "showColorScale": false,
-          "yHistogram": false
-        },
-        "yAxis": {
-          "axisPlacement": "left",
-          "reverse": false
-        }
-      },
-      "pluginVersion": "12.4.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "sum(increase(http_request_duration_seconds_bucket{job=\"flask\"}[5m])) by (le)",
-          "refId": "A"
-        }
-      ],
-      "title": "Latency Heatmap",
-      "type": "heatmap"
     },
     {
       "datasource": {
@@ -727,17 +828,18 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 24
+        "w": 12,
+        "x": 12,
+        "y": 12
       },
-      "id": 10,
+      "id": 11,
       "options": {
         "legend": {
           "calcs": [],
@@ -758,8 +860,8 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "process_resident_memory_bytes{job=\"flask\"} / 1024 / 1024",
-          "legendFormat": "Memory MB",
+          "expr": "histogram_quantile(0.5, rate(http_request_duration_seconds_bucket[5m])) * 1000",
+          "legendFormat": "P50",
           "refId": "A"
         },
         {
@@ -767,8 +869,8 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "rate(process_cpu_seconds_total{job=\"flask\"}[5m]) * 100",
-          "legendFormat": "CPU %",
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) * 1000",
+          "legendFormat": "P95",
           "refId": "B"
         },
         {
@@ -776,12 +878,12 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "process_open_fds{job=\"flask\"}",
-          "legendFormat": "Open FDs",
+          "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) * 1000",
+          "legendFormat": "P99",
           "refId": "C"
         }
       ],
-      "title": "Process Metrics",
+      "title": "Request Duration Histogram",
       "type": "timeseries"
     }
   ],
@@ -789,19 +891,20 @@
   "refresh": "5s",
   "schemaVersion": 42,
   "tags": [
-    "flask"
+    "flask",
+    "python"
   ],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Flask Application Dashboard",
-  "uid": "adg52cx",
-  "version": 1,
+  "title": "Flask App Health Dashboard",
+  "uid": "adtvvbt",
+  "version": 2,
   "weekStart": ""
 }
