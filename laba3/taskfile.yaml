@@ -16,3 +16,9 @@ tasks:
     cmds:
       - task: down
       - task: up
+
+
+  push:
+    cmds:
+      - docker tag laba3-flask:latest lendy1/laba3-flask:latest
+      - docker push lendy1/laba3-flask:latest
