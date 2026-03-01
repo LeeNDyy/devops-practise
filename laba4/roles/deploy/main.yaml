@@ -1,0 +1,7 @@
+- import_tasks: minikube.yaml
+
+- import_tasks: postgres.yaml
+
+- import_tasks: monitoring.yaml
+
+- import_tasks: argocd.yaml

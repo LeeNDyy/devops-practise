@@ -1,0 +1,78 @@
+# module for apply conf yaml files for main app (flask)
+
+# first insatll prerequisites and kubernetes Python library
+# - name: Install Python pip prerequisites
+#  ansible.builtin.apt:
+#    name:
+#      - python3-pip
+#      - python3-dev
+#      - python3-setuptools
+#    state: present
+
+#- name: Install kubernetes Python library
+#  ansible.builtin.pip:
+#    name: 
+#      - kubernetes>=29.0.0
+#      - openshift
+#    executable: pip3
+#    state: present 
+
+# create namespace for app, uncoment if don't have this ns
+#- name: create ns
+#  kubernetes.core.k8s:
+#    state: present
+#    template: ns.yaml.j2
+#    kubeconfig: /root/.kube/config
+#  tags: [namespace, deploy]
+
+#enable ingress
+# - name: Enable Minikube Ingress addon
+#   ansible.builtin.command: minikube addons enable ingress
+#   register: ingress_enable
+
+- name: apply secret manifest
+  kubernetes.core.k8s:
+    state: present
+    template: sec-app.yaml.j2
+    kubeconfig: /root/.kube/config
+    
+
+- name: apply deployment manifest
+  kubernetes.core.k8s:
+    state: present
+    template: dep-app.yaml.j2
+    kubeconfig: /root/.kube/config
+    
+
+- name: apply service manifest
+  kubernetes.core.k8s:
+    state: present
+    template: ser-app.yaml.j2
+    kubeconfig: /root/.kube/config
+    
+
+- name: apply ingress manifest
+  kubernetes.core.k8s:
+    state: present
+    template: ingress.yaml.j2
+    kubeconfig: /root/.kube/config
+    
+#enable metallb
+- name: Enable Minikube Ingress addon
+  ansible.builtin.command: minikube addons enable metallb
+  register: ingress_enable
+
+- name: apply metallb manifest
+  kubernetes.core.k8s:
+    state: present
+    template: ingress.yaml.j2
+    kubeconfig: /root/.kube/config
+
+
+
+
+  
+
+  
+
+

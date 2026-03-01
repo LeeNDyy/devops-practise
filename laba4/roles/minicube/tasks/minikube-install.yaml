@@ -1,0 +1,115 @@
+# module for install minikube and kubectl
+
+- name: Create download directory
+  ansible.builtin.file:
+    state: directory
+    mode: 'u=rwx,go=rx'
+    dest: '{{ minikube_download_dir }}'
+
+- name: Download sha256sum
+  ansible.builtin.get_url:
+    url: '{{ minikube_mirror }}/{{ minikube_redis_filename }}.sha256'
+    dest: '{{ minikube_download_dir }}/{{ minikube_download_filename }}.sha256'
+    force: false
+    use_proxy: true
+    validate_certs: true
+    mode: 'u=rw,go=r'
+
+- name: Read sha256sum
+  ansible.builtin.slurp:
+    src: '{{ minikube_download_dir }}/{{ minikube_download_filename }}.sha256'
+  register: minikube_sha256sum
+
+- name: Download Minikube
+  ansible.builtin.get_url:
+    url: '{{ minikube_mirror }}/{{ minikube_redis_filename }}'
+    dest: '{{ minikube_download_dir }}/{{ minikube_download_filename }}'
+    checksum: 'sha256:{{ minikube_sha256sum.content | b64decode | trim }}'
+    force: false
+    use_proxy: true
+    validate_certs: true
+    mode: 'u=rw,go=r'
+
+- name: Create the Minikube installation dir
+  become: true
+  ansible.builtin.file:
+    state: directory
+    owner: root
+    group: root
+    mode: 'u=rwx,go=rx'
+    dest: '{{ minikube_install_dir }}'
+
+- name: Install Minikube
+  become: true
+  ansible.builtin.copy:
+    src: '{{ minikube_download_dir }}/{{ minikube_download_filename }}'
+    remote_src: true
+    dest: '{{ minikube_install_path }}'
+    force: true
+    owner: root
+    group: root
+    mode: 'u=rwx,go=rx'
+
+# - name: install requrements for minikube
+#   ansible.builtin.apt:
+#     name: 
+#       - docker
+#       - virsh
+#       - podman
+#       - qemu-system-x86_64
+#     state: latest
+#     enabled: yes
+
+# - name: Install docker.io 
+#   ansible.builtin.apt:
+#     name: docker.io
+#     state: present
+#     update_cache: yes
+
+# - name: Add user to docker group
+#   ansible.builtin.user:
+#     name: "{{ ansible_user }}"
+#     groups: docker
+#     append: yes
+
+# - name: Restart to apply docker group
+#   ansible.builtin.reboot:
+#   when: ansible_pkg_mgr == 'docker.io'
+
+# - name: Ensure Docker service running
+#   ansible.builtin.systemd:
+#     name: docker
+#     enabled: yes
+#     state: started
+
+# - name: Restart to apply group membership
+#   ansible.builtin.reboot:
+
+- name: Add Kubernetes repository 
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+    filename: kubernetes
+    update_cache: no  
+
+- name: Install kubectl binary 
+  ansible.builtin.get_url:
+    url: https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+  vars:
+    kubectl_version: "v1.32.0"  # или stable
+
+- name: Verify kubectl
+  ansible.builtin.command: kubectl version --client
+  
+- name: Start Minikube as non-root user
+  ansible.builtin.command: 
+    cmd: sudo -u {{ ansible_user }} -H bash -c 'minikube start --driver=docker'
+  register: minikube_result
+
+- name: Ensure .kube directory exists for root
+  ansible.builtin.file:
+    path: /root/.kube
+    state: directory
+    mode: '0700'

@@ -1,0 +1,594 @@
+> MODULE [1mkubernetes.core.k8s[0m (/usr/lib/python3.13/site-packages/ansible_collections/kubernetes/core/plugins/modules/k8s.py)
+
+  Use the Kubernetes Python client to perform CRUD operations on K8s objects.
+  Pass the object definition from a source file or inline. See examples for reading files and using Jinja templates or vault-encrypted files.
+  Access to the full range of K8s APIs.
+  Use the [0;33mkubernetes.core.k8s_info[0m module to obtain a list of items about an object of type [1;30m`kind'[0m
+  Authenticate using either a config file, certificates, password or token.
+  Supports check mode.
+
+[1m  * note:[0m This module has a corresponding action plugin.
+
+[1mOPTIONS[0m (red indicates it is required):
+
+   [0;33mapi_key[0m  Token used to authenticate with the API. Can also be specified via K8S_AUTH_API_KEY environment variable.
+        default: null
+        type: str
+
+   [0;33mapi_version[0m  Use to specify the API version.
+                Use to create, delete, or discover an object without providing a full resource definition.
+                Use in conjunction with [4mkind[0m, [4mname[0m, and [4mnamespace[0m to identify a specific object.
+                If [4mresource definition[0m is provided, the [4mapiVersion[0m value from the [4mresource_definition[0m will override this option.
+        aliases: [api, version]
+        default: v1
+        type: str
+
+   [0;33mappend_hash[0m  Whether to append a hash to a resource name for immutability purposes
+                Applies only to ConfigMap and Secret resources
+                The parameter will be silently ignored for other resource kinds
+                The full definition of an object is needed to generate the hash - this means that deleting an object created with append_hash will only work if
+                the same object is passed with state=absent (alternatively, just use state=absent with the name including the generated hash and append_hash=no)
+        default: false
+        type: bool
+
+   [0;33mapply[0m   [1;30m`apply'[0m compares the desired resource definition with the previously supplied resource definition, ignoring properties that are
+           automatically generated
+           [1;30m`apply'[0m works better with Services than 'force=yes'
+           Mutually exclusive with [1;30m`merge_type'[0m.
+        default: false
+        type: bool
+
+   [0;33mca_cert[0m  Path to a CA certificate used to authenticate with the API. The full certificate chain must be provided to avoid certificate validation errors. Can
+            also be specified via K8S_AUTH_SSL_CA_CERT environment variable.
+        aliases: [ssl_ca_cert]
+        default: null
+        type: path
+
+   [0;33mclient_cert[0m  Path to a certificate used to authenticate with the API. Can also be specified via K8S_AUTH_CERT_FILE environment variable.
+        aliases: [cert_file]
+        default: null
+        type: path
+
+   [0;33mclient_key[0m  Path to a key file used to authenticate with the API. Can also be specified via K8S_AUTH_KEY_FILE environment variable.
+        aliases: [key_file]
+        default: null
+        type: path
+
+   [0;33mcontext[0m  The name of a context found in the config file. Can also be specified via K8S_AUTH_CONTEXT environment variable.
+        default: null
+        type: str
+
+   [0;33mcontinue_on_error[0m  Whether to continue on creation/deletion errors when multiple resources are defined.
+                      This has no effect on the validation step which is controlled by the [1;30m`validate.fail_on_error'[0m parameter.
+        default: false
+        type: bool
+
+   [0;33mdelete_all[0m  When this option is set to [4mtrue[0m and [4mstate=absent[0m, module will delete all resources of the specified resource type in the requested
+               namespace.
+               Ignored when [1;30m`state'[0m is not set to [4mabsent[0m or when one of (src), [1;30m`name'[0m  or [1;30m`resource_definition'[0m is
+               provided.
+               Parameter [1;30m`kind'[0m is required to use this option.
+               This parameter can be used with [1;30m`label_selectors'[0m to restrict the resources to be deleted.
+        aliases: [all]
+        default: false
+        type: bool
+
+   [0;33mdelete_options[0m  Configure behavior when deleting an object.
+                   Only used when [4mstate=absent[0m.
+        default: null
+        type: dict
+        suboptions:
+
+           [0;33mgracePeriodSeconds[0m  Specify how many seconds to wait before forcefully terminating.
+                               Only implemented for Pod resources.
+                               If not specified, the default grace period for the object type will be used.
+          default: null
+          type: int
+
+           [0;33mpreconditions[0m  Specify condition that must be met for delete to proceed.
+          default: null
+          type: dict
+          suboptions:
+
+             [0;33mresourceVersion[0m  Specify the resource version of the target object.
+            default: null
+            type: str
+
+             [0;33muid[0m  Specify the UID of the target object.
+            default: null
+            type: str
+
+           [0;33mpropagationPolicy[0m  Use to control how dependent objects are deleted.
+                              If not specified, the default policy for the object type will be used. This may vary across object types.
+          choices: [Foreground, Background, Orphan]
+          default: null
+          type: str
+
+   [0;33mforce[0m   If set to [1;30m`yes'[0m, and [4mstate[0m is [1;30m`present'[0m, an existing object will be replaced.
+        default: false
+        type: bool
+
+   [0;33mgenerate_name[0m  Use to specify the basis of an object name and random characters will be added automatically on server to generate a unique name.
+                  This option is ignored when [4mstate[0m is not set to [1;30m`present'[0m or when [4mapply[0m is set to [1;30m`yes'[0m.
+                  If [4mresource definition[0m is provided, the [4mmetadata.generateName[0m value from the [4mresource_definition[0m will override this
+                  option.
+                  If [4mresource definition[0m is provided, and contains [4mmetadata.name[0m, this option is ignored.
+                  mutually exclusive with [1;30m`name'[0m.
+        default: null
+        type: str
+
+   [0;33mhidden_fields[0m  Hide fields matching this option in the result
+                  An example might be [1;30m`hidden_fields=[metadata.managedFields]'[0m or `hidden_fields=[spec.containers[0].env[3].value]' or
+                  `hidden_fields=[metadata.annotations[kubectl.kubernetes.io/last-applied-configuration]]'
+        default: null
+        elements: str
+        type: list
+
+   [0;33mhost[0m    Provide a URL for accessing the API. Can also be specified via K8S_AUTH_HOST environment variable.
+        default: null
+        type: str
+
+   [0;33mimpersonate_groups[0m  Group(s) to impersonate for the operation.
+                       Can also be specified via K8S_AUTH_IMPERSONATE_GROUPS environment. Example: Group1,Group2
+        default: null
+        elements: str
+        type: list
+
+   [0;33mimpersonate_user[0m  Username to impersonate for the operation.
+                     Can also be specified via K8S_AUTH_IMPERSONATE_USER environment.
+        default: null
+        type: str
+
+   [0;33mkind[0m    Use to specify an object model.
+           Use to create, delete, or discover an object without providing a full resource definition.
+           Use in conjunction with [4mapi_version[0m, [4mname[0m, and [4mnamespace[0m to identify a specific object.
+           If [4mresource definition[0m is provided, the [4mkind[0m value from the [4mresource_definition[0m will override this option.
+        default: null
+        type: str
+
+   [0;33mkubeconfig[0m  Path to an existing Kubernetes config file. If not provided, and no other connection options are provided, the Kubernetes client will attempt to
+               load the default configuration file from [4m~/.kube/config[0m. Can also be specified via K8S_AUTH_KUBECONFIG environment variable.
+               Multiple Kubernetes config file can be provided using separator ';' for Windows platform or ':' for others platforms.
+               The kubernetes configuration can be provided as dictionary. This feature requires a python kubernetes client version >= 17.17.0. Added in version
+               2.2.0.
+        default: null
+        type: raw
+
+   [0;33mlabel_selectors[0m  Selector (label query) to filter on.
+        default: null
+        elements: str
+        type: list
+
+   [0;33mmerge_type[0m  Whether to override the default patch merge approach with a specific type. By default, the strategic merge will typically be used.
+               For example, Custom Resource Definitions typically aren't updatable by the usual strategic merge. You may want to use [1;30m`merge'[0m if you
+               see "strategic merge patch format is not supported".
+               See https://kubernetes.io/docs/tasks/run-application/update-api-object-kubectl-patch/#use-a-json-merge-patch-to-update-a-deployment
+               If more than one [1;30m`merge_type'[0m is given, the merge_types will be tried in order. This defaults to [1;30m`['strategic-merge',
+               'merge']'[0m, which is ideal for using the same parameters on resource kinds that combine Custom Resources and built-in resources.
+               Mutually exclusive with [1;30m`apply'[0m.
+               [4mmerge_type=json[0m has been removed in version 4.0.0. Please use [0;33mkubernetes.core.k8s_json_patch[0m instead.
+        choices: [merge, strategic-merge]
+        default: null
+        elements: str
+        type: list
+
+   [0;33mname[0m    Use to specify an object name.
+           Use to create, delete, or discover an object without providing a full resource definition.
+           Use in conjunction with [4mapi_version[0m, [4mkind[0m and [4mnamespace[0m to identify a specific object.
+           If [4mresource definition[0m is provided, the [4mmetadata.name[0m value from the [4mresource_definition[0m will override this option.
+        default: null
+        type: str
+
+   [0;33mnamespace[0m  Use to specify an object namespace.
+              Useful when creating, deleting, or discovering an object without providing a full resource definition.
+              Use in conjunction with [4mapi_version[0m, [4mkind[0m, and [4mname[0m to identify a specific object.
+              If [4mresource definition[0m is provided, the [4mmetadata.namespace[0m value from the [4mresource_definition[0m will override this option.
+        default: null
+        type: str
+
+   [0;33mno_proxy[0m  The comma separated list of hosts/domains/IP/CIDR that shouldn't go through proxy. Can also be specified via K8S_AUTH_NO_PROXY environment variable.
+             Please note that this module does not pick up typical proxy settings from the environment (e.g. NO_PROXY).
+             This feature requires kubernetes>=19.15.0. When kubernetes library is less than 19.15.0, it fails even no_proxy set in correct.
+             example value is "localhost,.local,.example.com,127.0.0.1,127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+        default: null
+        type: str
+
+   [0;33mpassword[0m  Provide a password for authenticating with the API. Can also be specified via K8S_AUTH_PASSWORD environment variable.
+             Please read the description of the [1;30m`username'[0m option for a discussion of when this option is applicable.
+        default: null
+        type: str
+
+   [0;33mpersist_config[0m  Whether or not to save the kube config refresh tokens. Can also be specified via K8S_AUTH_PERSIST_CONFIG environment variable.
+                   When the k8s context is using a user credentials with refresh tokens (like oidc or gke/gcloud auth), the token is refreshed by the k8s python
+                   client library but not saved by default. So the old refresh token can expire and the next auth might fail. Setting this flag to true will tell
+                   the k8s python client to save the new refresh token to the kube config file.
+                   Default to false.
+                   Please note that the current version of the k8s python client library does not support setting this flag to True yet.
+                   The fix for this k8s python library is here: https://github.com/kubernetes-client/python-base/pull/169
+        default: null
+        type: bool
+
+   [0;33mproxy[0m   The URL of an HTTP proxy to use for the connection. Can also be specified via K8S_AUTH_PROXY environment variable.
+           Please note that this module does not pick up typical proxy settings from the environment (e.g. HTTP_PROXY).
+        default: null
+        type: str
+
+   [0;33mproxy_headers[0m  The Header used for the HTTP proxy.
+                  Documentation can be found here
+                  https://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html?highlight=proxy_headers#urllib3.util.make_headers.
+        default: null
+        type: dict
+        suboptions:
+
+           [0;33mbasic_auth[0m  Colon-separated username:password for basic authentication header.
+                       Can also be specified via K8S_AUTH_PROXY_HEADERS_BASIC_AUTH environment.
+          default: null
+          type: str
+
+           [0;33mproxy_basic_auth[0m  Colon-separated username:password for proxy basic authentication header.
+                             Can also be specified via K8S_AUTH_PROXY_HEADERS_PROXY_BASIC_AUTH environment.
+          default: null
+          type: str
+
+           [0;33muser_agent[0m  String representing the user-agent you want, such as foo/1.0.
+                       Can also be specified via K8S_AUTH_PROXY_HEADERS_USER_AGENT environment.
+          default: null
+          type: str
+
+   [0;33mresource_definition[0m  Provide a valid YAML definition (either as a string, list, or dict) for an object when creating or updating.
+                        NOTE: [4mkind[0m, [4mapi_version[0m, [4mname[0m, and [4mnamespace[0m will be overwritten by corresponding values found in the
+                        provided [4mresource_definition[0m.
+        aliases: [definition, inline]
+        default: null
+
+   [0;33mserver_side_apply[0m  When this option is set, apply runs in the server instead of the client.
+                      Ignored if [1;30m`apply'[0m is not set or is set to False.
+                      This option requires "kubernetes >= 19.15.0".
+        default: null
+        type: dict
+        suboptions:
+
+           [0;31m[1mfield_manager[0m[0m  Name of the manager used to track field ownership.
+          type: str
+
+           [0;33mforce_conflicts[0m  A conflict is a special status error that occurs when an Server Side Apply operation tries to change a field, which another user also
+                            claims to manage.
+                            When set to True, server-side apply will force the changes against conflicts.
+          default: false
+          type: bool
+
+   [0;33msrc[0m     Provide a path to a file containing a valid YAML definition of an object or objects to be created or updated. Mutually exclusive with
+           [4mresource_definition[0m. NOTE: [4mkind[0m, [4mapi_version[0m, [4mname[0m, and [4mnamespace[0m will be overwritten by corresponding values
+           found in the configuration read in from the [4msrc[0m file.
+           Reads from the local file system. To read from the Ansible controller's file system, including vaulted files, use the file lookup plugin or template
+           lookup plugin, combined with the from_yaml filter, and pass the result to [4mresource_definition[0m. See Examples below.
+           The URL to manifest files that can be used to create the resource. Added in version 2.4.0.
+           Mutually exclusive with [4mtemplate[0m in case of [0;33mkubernetes.core.k8s[0m module.
+        default: null
+        type: path
+
+   [0;33mstate[0m   Determines if an object should be created, patched, or deleted. When set to [1;30m`present'[0m, an object will be created, if it does not already
+           exist. If set to [1;30m`absent'[0m, an existing object will be deleted. If set to [1;30m`present'[0m, an existing object will be patched, if its
+           attributes differ from those specified using [4mresource_definition[0m or [4msrc[0m.
+           [1;30m`patched'[0m state is an existing resource that has a given patch applied. If the resource doesn't exist, silently skip it (do not raise an
+           error).
+        choices: [absent, present, patched]
+        default: present
+        type: str
+
+   [0;33mtemplate[0m  Provide a valid YAML template definition file for an object when creating or updating.
+             Value can be provided as string or dictionary.
+             The parameter accepts multiple template files. Added in version 2.0.0.
+             Mutually exclusive with [1;30m`src'[0m and [1;30m`resource_definition'[0m.
+             Template files needs to be present on the Ansible Controller's file system.
+             Additional parameters can be specified using dictionary.
+             Valid additional parameters -
+             [1;30m`newline_sequence'[0m (str): Specify the newline sequence to use for templating files. valid choices are "\n", "\r", "\r\n". Default value
+             "\n".
+             [1;30m`block_start_string'[0m (str): The string marking the beginning of a block. Default value "{%".
+             [1;30m`block_end_string'[0m (str): The string marking the end of a block. Default value "%}".
+             [1;30m`variable_start_string'[0m (str): The string marking the beginning of a print statement. Default value "{{".
+             [1;30m`variable_end_string'[0m (str): The string marking the end of a print statement. Default value "}}".
+             [1;30m`trim_blocks'[0m (bool): Determine when newlines should be removed from blocks. When set to [1;30m`yes'[0m the first newline after a block
+             is removed (block, not variable tag!). Default value is true.
+             [1;30m`lstrip_blocks'[0m (bool): Determine when leading spaces and tabs should be stripped. When set to [1;30m`yes'[0m leading spaces and tabs
+             are stripped from the start of a line to a block. This functionality requires Jinja 2.7 or newer. Default value is false.
+        default: null
+        type: raw
+
+   [0;33musername[0m  Provide a username for authenticating with the API. Can also be specified via K8S_AUTH_USERNAME environment variable.
+             Please note that this only works with clusters configured to use HTTP Basic Auth. If your cluster has a different form of authentication (e.g.
+             OAuth2 in OpenShift), this option will not work as expected and you should look into the [0;33mcommunity.okd.k8s_auth[0m module, as that might do
+             what you need.
+        default: null
+        type: str
+
+   [0;33mvalidate[0m  how (if at all) to validate the resource definition against the kubernetes schema. Requires the kubernetes-validate python module.
+        default: null
+        type: dict
+        suboptions:
+
+           [0;33mfail_on_error[0m  whether to fail on validation errors.
+          default: null
+          type: bool
+
+           [0;33mstrict[0m  whether to fail when passing unexpected properties
+          default: true
+          type: bool
+
+           [0;33mversion[0m  version of Kubernetes to validate against. defaults to Kubernetes server version
+          default: null
+          type: str
+
+   [0;33mvalidate_certs[0m  Whether or not to verify the API server's SSL certificates. Can also be specified via K8S_AUTH_VERIFY_SSL environment variable.
+        aliases: [verify_ssl]
+        default: null
+        type: bool
+
+   [0;33mwait[0m    Whether to wait for certain resource kinds to end up in the desired state.
+           By default the module exits once Kubernetes has received the request.
+           Implemented for [1;30m`state=present'[0m for [1;30m`Deployment'[0m, [1;30m`DaemonSet'[0m and [1;30m`Pod'[0m, and for [1;30m`state=absent'[0m
+           for all resource kinds.
+           For resource kinds without an implementation, [1;30m`wait'[0m returns immediately unless [1;30m`wait_condition'[0m is set.
+        default: false
+        type: bool
+
+   [0;33mwait_condition[0m  Specifies a custom condition on the status to wait for.
+                   Ignored if [1;30m`wait'[0m is not set or is set to False.
+        default: null
+        type: dict
+        suboptions:
+
+           [0;33mreason[0m  The value of the reason field in your desired condition
+                   For example, if a [1;30m`Deployment'[0m is paused, The [1;30m`Progressing'[0m [1;30m`type'[0m will have the
+                   [1;30m`DeploymentPaused'[0m reason.
+                   The possible reasons in a condition are specific to each resource type in Kubernetes.
+                   See the API documentation of the status field for a given resource to see possible choices.
+          default: null
+          type: str
+
+           [0;33mstatus[0m  The value of the status field in your desired condition.
+                   For example, if a [1;30m`Deployment'[0m is paused, the [1;30m`Progressing'[0m [1;30m`type'[0m will have the [1;30m`Unknown'[0m status.
+          choices: ['True', 'False', Unknown]
+          default: 'True'
+          type: str
+
+           [0;33mtype[0m  The type of condition to wait for.
+                 For example, the [1;30m`Pod'[0m resource will set the [1;30m`Ready'[0m condition (among others).
+                 Required if you are specifying a [1;30m`wait_condition'[0m.
+                 If left empty, the [1;30m`wait_condition'[0m field will be ignored.
+                 The possible types for a condition are specific to each resource type in Kubernetes.
+                 See the API documentation of the status field for a given resource to see possible choices.
+          default: null
+          type: str
+
+   [0;33mwait_sleep[0m  Number of seconds to sleep between checks.
+        default: 5
+        type: int
+
+   [0;33mwait_timeout[0m  How long in seconds to wait for the resource to end up in the desired state.
+                 Ignored if [1;30m`wait'[0m is not set.
+        default: 120
+        type: int
+
+[1mNOTES:[0m
+      * To avoid SSL certificate validation errors when [1;30m`validate_certs'[0m is [4mTrue[0m, the full certificate chain for the API server must be
+        provided via [1;30m`ca_cert'[0m or in the kubeconfig file.
+
+[1mREQUIREMENTS:[0m  python >= 3.9, kubernetes >= 24.2.0, PyYAML >= 3.11, jsonpatch
+
+
+[1mAUTHOR[0m: Chris Houseknecht (@chouseknecht), Fabian von Feilitzsch (@fabianvf)
+
+[1mEXAMPLES:[0m
+- name: Create a k8s namespace
+  kubernetes.core.k8s:
+    name: testing
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Create a Service object from an inline definition
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: web
+        namespace: testing
+        labels:
+          app: galaxy
+          service: web
+      spec:
+        selector:
+          app: galaxy
+          service: web
+        ports:
+        - protocol: TCP
+          targetPort: 8000
+          name: port-8000-tcp
+          port: 8000
+
+- name: Remove an existing Service object
+  kubernetes.core.k8s:
+    state: absent
+    api_version: v1
+    kind: Service
+    namespace: testing
+    name: web
+
+# Passing the object definition from a file
+
+- name: Create a Deployment by reading the definition from a local file
+  kubernetes.core.k8s:
+    state: present
+    src: /testing/deployment.yml
+
+- name: >-
+    Read definition file from the Ansible controller file system.
+    If the definition file has been encrypted with Ansible Vault it will automatically be decrypted.
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', '/testing/deployment.yml') | from_yaml }}"
+
+- name: >-
+    (Alternative) Read definition file from the Ansible controller file system.
+    In this case, the definition file contains multiple YAML documents, separated by ---.
+    If the definition file has been encrypted with Ansible Vault it will automatically be decrypted.
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('file', '/testing/deployment.yml') | from_yaml_all }}"
+
+- name: Read definition template file from the Ansible controller file system
+  kubernetes.core.k8s:
+    state: present
+    template: '/testing/deployment.j2'
+
+- name: Read definition template file from the Ansible controller file system that uses custom start/end strings
+  kubernetes.core.k8s:
+    state: present
+    template:
+      path: '/testing/deployment.j2'
+      variable_start_string: '[['
+      variable_end_string: ']]'
+
+- name: Read multiple definition template file from the Ansible controller file system
+  kubernetes.core.k8s:
+    state: present
+    template:
+    - path: '/testing/deployment_one.j2'
+    - path: '/testing/deployment_two.j2'
+      variable_start_string: '[['
+      variable_end_string: ']]'
+
+- name: fail on validation errors
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', '/testing/deployment.yml') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+
+- name: warn on validation errors, check for unexpected properties
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', '/testing/deployment.yml') | from_yaml }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+
+# Download and apply manifest
+- name: Download metrics-server manifest to the cluster.
+  ansible.builtin.get_url:
+    url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+    dest: ~/metrics-server.yaml
+    mode: '0664'
+
+- name: Apply metrics-server manifest to the cluster.
+  kubernetes.core.k8s:
+    state: present
+    src: ~/metrics-server.yaml
+
+# Wait for a Deployment to pause before continuing
+- name: Pause a Deployment.
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: example
+        namespace: testing
+      spec:
+        paused: True
+    wait: yes
+    wait_condition:
+      type: Progressing
+      status: Unknown
+      reason: DeploymentPaused
+
+# Patch existing namespace : add label
+- name: add label to existing namespace
+  kubernetes.core.k8s:
+    state: patched
+    kind: Namespace
+    name: patch_namespace
+    definition:
+      metadata:
+        labels:
+          support: patch
+
+# Create object using generateName
+- name: create resource using name generated by the server
+  kubernetes.core.k8s:
+    state: present
+    generate_name: pod-
+    definition:
+      apiVersion: v1
+      kind: Pod
+      spec:
+        containers:
+        - name: py
+          image: python:3.7-alpine
+          imagePullPolicy: IfNotPresent
+
+# Server side apply
+- name: Create configmap using server side apply
+  kubernetes.core.k8s:
+    namespace: testing
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: my-configmap
+    apply: yes
+    server_side_apply:
+      field_manager: ansible
+
+# Delete all Deployment from specified namespace
+- name: Delete all Deployment from specified namespace
+  kubernetes.core.k8s:
+    api_version: apps/v1
+    namespace: testing
+    kind: Deployment
+    delete_all: true
+
+[1mRETURN VALUES:[0m
+
+   [0;33mresult[0m  The created, patched, or otherwise present object. Will be empty in the case of a deletion.
+        returned: success
+        type: complex
+        contains:
+
+           [0;33mapi_version[0m  The versioned schema of this representation of an object.
+          returned: success
+          type: str
+
+           [0;33mduration[0m  elapsed time of task in seconds
+          returned: when [1;30m`wait'[0m is true
+          sample: 48
+          type: int
+
+           [0;33merror[0m  error while trying to create/delete the object.
+          returned: error
+          type: complex
+
+           [0;33mitems[0m  Returned only when multiple yaml documents are passed to src or resource_definition
+          returned: when resource_definition or src contains list of objects
+          type: list
+
+           [0;33mkind[0m  Represents the REST resource this object represents.
+          returned: success
+          type: str
+
+           [0;33mmetadata[0m  Standard object metadata. Includes name, namespace, annotations, labels, etc.
+          returned: success
+          type: complex
+
+           [0;33mspec[0m  Specific attributes of the object. Will vary based on the [4mapi_version[0m and [4mkind[0m.
+          returned: success
+          type: complex
+
+           [0;33mstatus[0m  Current status details for the object.
+          returned: success
+          type: complex
+

@@ -1,0 +1,25 @@
+version: "3.8"
+
+dotenv:
+  - ".env"
+
+tasks:
+  deploy-minikube:
+    cmds:
+      - cd ./roles && ansible-playbook -i inventory/hosts.ini ./deploy/minicube.yaml 
+  
+  deploy-postgres:
+    cmds:
+      - cd ./roles && ansible-playbook -i inventory/hosts.ini ./deploy/postgres.yaml 
+  
+  deploy-monitoring:
+    cmds:
+      - cd ./roles && ansible-playbook -i inventory/hosts.ini ./deploy/monitoring.yaml 
+  
+  deploy-argocd:
+    cmds:
+      - cd ./roles && ansible-playbook -i inventory/hosts.ini ./deploy/argocd.yaml 
+  
+  deploy:
+    cmds:
+      - cd ./roles && ansible-playbook -i inventory/hosts.ini ./deploy/main.yaml 

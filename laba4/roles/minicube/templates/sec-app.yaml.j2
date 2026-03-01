@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sec-app
+  namespace: app
+type: Opaque
+stringData:
+    PG_HOST: ${PG_HOST}
+    PG_PORT: ${PG_PORT}
+    PG_NAME: ${PG_NAME}
+    PG_USER: ${PG_USER}
+    PG_PASSWORD: ${PG_PASSWORD}
