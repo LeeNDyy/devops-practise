@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-app
+  namespace: app
+  labels:
+    app.kubernetes.io/name: ingress-app
+  # annotations:
+  #   nginx.ingress.kubernetes.io/rewrite-target: / # <-- Раскомментируйте, если ваше приложение ожидает запросы только на корень "/"
+spec:
+  rules:
+  - host: myapp.local
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: ser-app
+            port: 
+              number: 80
+      - pathType: Prefix
+        path: /metrics
+        backend:
+          service:
+            name: ser-app
+            port:
+              number: 80
+

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sec-app
+  namespace: app
+type: Opaque
+stringData:
+    PG_HOST: postgres
+    PG_PORT: "5432"
+    PG_NAME: postgres
+    PG_USER: postgres
+    PG_PASSWORD: postgres
