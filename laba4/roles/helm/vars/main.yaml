@@ -1,0 +1,5 @@
+helm_release_name: flask-app
+chart_local_path: "/home/lendy/devops-practise/laba4/helm/helm-app"  
+chart_remote_path: "/tmp/helm-app"
+kubeconfig: "/root/.kube/config"
+namespace: "test"
