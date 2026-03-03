@@ -1,0 +1,28 @@
+replicas: 1
+
+image:
+  repository: lendy1/laba3-flask
+  tag: "latest"
+
+service:
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  host: test-app.local
+
+secret:
+  PG_HOST: postgres
+  PG_PORT: "5432"
+  PG_NAME: postgres
+  PG_USER: postgres
+  PG_PASSWORD: postgres
+
+resources:
+  requests:
+    memory: "32Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  namespace: {{ .Release.Namespace | default "app" }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      containers:
+      - name: hello
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - secretRef:
+            name: sec-app
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}

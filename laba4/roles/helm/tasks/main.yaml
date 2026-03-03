@@ -1,0 +1,43 @@
+
+# copy helm-app on vm
+- name: Copy helm chart to remote VM
+  copy:
+    src: helm-app/
+    dest: "{{ chart_remote_path }}"
+
+#install helm
+- name: Install Helm if not exists
+  shell: |
+    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 || true
+    chmod 700 get_helm.sh
+    ./get_helm.sh
+    rm get_helm.sh
+  args:
+    creates: /usr/local/bin/helm
+
+# 4. Создаём namespace
+- name: Create namespace
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - ns.yaml.j2
+    kubeconfig: "{{ kubeconfig }}"
+
+- name: Deploy Helm chart (skip existing namespace)
+  kubernetes.core.helm:
+    name: "{{ helm_release_name }}"
+    chart_ref: "{{ chart_remote_path }}"
+    release_namespace: "{{ namespace }}"  # test
+    kubeconfig: "{{ kubeconfig }}"
+    wait: true
+    timeout: 5m
+    atomic: true
+    state: present
+    skip_crds: true  # ← пропустит namespace
+
+# Очистка (опционально)
+- name: Cleanup chart dir
+  file:
+    path: "{{ chart_remote_path }}"
+    state: absent
+  when: false 

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test
+  labels:
+    name: test
+    app.kubernetes.io/managed-by: Helm  # ← Helm метка
+  annotations:
+    meta.helm.sh/release-name: flask-app  # ← имя релиза
+    meta.helm.sh/release-namespace: test  # ← namespace релиза
