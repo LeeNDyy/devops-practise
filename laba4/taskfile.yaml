@@ -6,7 +6,7 @@ dotenv:
 tasks:
   deploy-minikube:
     cmds:
-      - cd ./roles && ansible-playbook -i inventory/hosts.ini ./deploy/minicube.yaml 
+      - cd ./roles && ansible-playbook -i inventory/hosts.ini ./deploy/minikube.yaml 
   
   deploy-postgres:
     cmds:
