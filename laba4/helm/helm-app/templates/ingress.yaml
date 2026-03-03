@@ -1,0 +1,28 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-app
+  namespace: {{ .Release.Namespace | default "app" }}
+  labels:
+    app.kubernetes.io/name: ingress-app
+spec:
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: ser-app
+            port:
+              number: {{ .Values.service.port }}
+      - pathType: Prefix
+        path: /metrics
+        backend:
+          service:
+            name: ser-app
+            port:
+              number: {{ .Values.service.port }}
+{{- end }}
