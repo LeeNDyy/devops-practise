@@ -19,7 +19,11 @@ tasks:
   deploy-argocd:
     cmds:
       - cd ./roles && ansible-playbook -i inventory/hosts.ini ./deploy/argocd.yaml 
-  
+
+  deploy-helm-app:
+    cmds:
+      - cd ./roles && ansible-playbook -i inventory/hosts.ini ./deploy/helm.yaml 
+
   deploy:
     cmds:
       - cd ./roles && ansible-playbook -i inventory/hosts.ini ./deploy/main.yaml 
