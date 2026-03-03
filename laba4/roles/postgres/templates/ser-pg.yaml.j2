@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ser-pg
+  namespace: postgres
+spec:
+  type: ClusterIP 
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: dep-pg

@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dep-pg
+  namespace: postgres
+spec:
+  serviceName: "ser-db"
+  selector:
+    matchLabels:
+      app: dep-pg
+  template:
+    metadata:
+      labels:
+        app: dep-pg
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16
+        env: 
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sec-pg
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: sec-pg
+              key: POSTGRES_USER
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: sec-pg
+              key: POSTGRES_DB
+        - name: POSTGRES_INITDB_ARGS
+          value: "--locale=C --encoding=UTF8" 
+        - name: LANG
+          value: "C.UTF-8"
+        - name: LC_ALL  
+          value: "C.UTF-8"
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data # Куда БД пишет файлы
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d # Куда кладем наш init.sql
+
+      - name: postgres-exporter
+        image: quay.io/prometheuscommunity/postgres-exporter:latest
+        env:
+        - name: DATA_SOURCE_NAME
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:5432/postgres?sslmode=disable"
+        envFrom:
+        - secretRef:
+            name: sec-pg
+        ports:
+        - name: metrics
+          containerPort: 9187
+
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: pvc-pg # Подключаем диск
+      - name: init-script
+        configMap:
+          name: db-init-script # Подключаем скрипт инициализации

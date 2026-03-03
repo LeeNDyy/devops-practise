@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-pg-metrics
+  namespace: postgres
+spec:
+  rules:
+  - host: postgres.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ser-pg
+            port:
+              number: 5432
+      
+      - path: /metrics
+        pathType: Prefix
+        backend:
+          service:
+            name: ser-exporter
+            port:
+              number: 9187
+

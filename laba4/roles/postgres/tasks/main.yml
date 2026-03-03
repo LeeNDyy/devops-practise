@@ -1,0 +1,52 @@
+#create namespace for postgres, uncoment if don't have this ns
+- name: create ns
+  kubernetes.core.k8s:
+   state: present
+   template: ns.yaml.j2
+   kubeconfig: /root/.kube/config
+    
+- name: apply pvc manifest
+  kubernetes.core.k8s:
+    state: present
+    template: pvc-pg.yaml.j2
+    kubeconfig: /root/.kube/config
+
+- name: apply secret manifest
+  kubernetes.core.k8s:
+    state: present
+    template: sec-pg.yaml.j2
+    kubeconfig: /root/.kube/config
+    
+
+- name: apply db-init manifest
+  kubernetes.core.k8s:
+    state: present
+    template: db-init.yaml.j2
+    kubeconfig: /root/.kube/config
+
+- name: apply deployment manifest
+  kubernetes.core.k8s:
+    state: present
+    template: dep-pg.yaml.j2
+    kubeconfig: /root/.kube/config
+    
+- name: apply service manifest
+  kubernetes.core.k8s:
+    state: present
+    template: ser-pg.yaml.j2
+    kubeconfig: /root/.kube/config
+
+- name: apply service exporter manifest
+  kubernetes.core.k8s:
+    state: present
+    template: ser-exporter.yaml.j2
+    kubeconfig: /root/.kube/config
+
+- name: apply ingress manifest
+  kubernetes.core.k8s:
+    state: present
+    template: ingress.yaml.j2
+    kubeconfig: /root/.kube/config
+
+
+    
