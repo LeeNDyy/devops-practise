@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argocd-secret
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-secret
+    app.kubernetes.io/part-of: argocd
+type: Opaque
+data:
+  server.secretkey: RGFkVzJpR0tERFQxZWVpdklyM2ZWcmx4NVNSdm9Wd0VIbnNzb1dwMlhNPT0=
+  admin.passwordMtime: MjAyNi0wMy0wM1QwNjoyNjo0MFoK
+  admin.password: JDJiJDEwJGFkeHM3SjhnYjRaalpMRD5jWEJsTC5ncUZycktYYWl6QmFaUjVOYmVocUI3WmpBZXlreExaZQ==

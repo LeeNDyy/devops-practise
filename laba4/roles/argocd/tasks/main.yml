@@ -1,0 +1,48 @@
+
+- name: create ns argocd
+  kubernetes.core.k8s:
+   state: present
+   template: ns.yaml.j2
+   kubeconfig: /root/.kube/config
+
+- name: apply secret argocd
+  kubernetes.core.k8s:
+   state: present
+   template: sec-argocd.yaml.j2
+   kubeconfig: /root/.kube/config
+
+
+# - name: apply condfigmap argocd
+#   kubernetes.core.k8s:
+#    state: present
+#    template: conf-argocd.yaml.j2
+#    kubeconfig: /root/.kube/config
+
+#for install argocd
+# - name: Install ArgoCD using official manifest
+#   kubernetes.core.k8s:
+#     state: present
+#     namespace: argocd
+#     src: https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+#     wait: yes # Ждем, пока ресурсы будут готовы
+#     wait_timeout: 120 # Увеличим таймаут, если нужно
+
+- name: apply ingress argocd
+  kubernetes.core.k8s:
+   state: present
+   template: ingress.yaml.j2
+   kubeconfig: /root/.kube/config
+  
+# - name: Expose ArgoCD Server as LoadBalancer (Optional, for cloud environments)
+#   # Если ты используешь облачный провайдер, и хочешь, чтобы ArgoCD был доступен
+#   # извне через LoadBalancer. Для локальной разработки можно использовать port-forward.
+#   kubernetes.core.k8s:
+#     api_version: v1
+#     kind: Service
+#     name: argocd-server
+#     namespace: argocd
+#     state: present
+#     definition:
+#       spec:
+#         type: LoadBalancer
+#   when: false # Измени на 'true', если хочешь использовать LoadBalancer
